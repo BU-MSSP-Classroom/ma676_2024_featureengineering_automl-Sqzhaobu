@@ -328,7 +328,8 @@ You will use the framework of tidymodel workflow, which will run these transform
 
 Since you've worked on it in MA679 please copy and paste your best model here.  
 ```{r,echo=TRUE}
-##
+lmfit_2008<- lm(log(SalePrice) ~ log(`Lot Area`)+`Year Built`+`Year Remod/Add` + `Total Bsmt SF` + `1st Flr SF` +  log(`Gr Liv Area`) + `Bsmt Full Bath`  + `TotRms AbvGrd` + `Garage Area` + `Wood Deck SF` + `Open Porch SF` , data = ames_raw_2008) 
+summary(lmfit_2008)
 ##
 ```
 
@@ -343,9 +344,24 @@ Please write your answer in full sentences.
 Please perform feature engineering on the Ames housing data that you think will help with the prediction.
 
 ```{r,echo=TRUE}
-##
-##
+numeric_vars = ames_raw_2008 %>% select(where(is.numeric)) 
+BiocManager::install("pcaMethods")
 ```
+```{r,echo=TRUE}
+pca_numeric<-pcaMethods::pca(numeric_vars,nPcs=20,scale="uv")
+summary(pca_numeric)
+```
+```{r}
+#We choose PC1 - PC 14 to fit a new model
+pc_scores <- scores(pca_numeric)[, 1:14]
+# Combine PC scores with response variable
+data <- data.frame(ames_raw_2008$SalePrice, pc_scores)
+
+# Fit linear regression model
+model <- lm(ames_raw_2008$SalePrice ~ ., data = data)
+summary(model)
+```
+
 
 Your answer:
 
